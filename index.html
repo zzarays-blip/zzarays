@@ -195,6 +195,8 @@ function startCountdown() {
   }, 1000);
 }
 
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbySibtwMuSclrXSo25pvaj0EmplEhlvNQSl7AHKKU5S-enFzb2Z8Sk2ZMeDiX1Sxn-Whw/exec';
+
 async function submitOrder() {
   const name = document.getElementById('nameInput').value.trim();
   const dept = document.getElementById('deptInput').value.trim();
@@ -206,6 +208,16 @@ async function submitOrder() {
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span>저장 중...';
   const menu = menus[selectedMenu];
   const row = {time:new Date().toLocaleString('ko-KR'), name, dept, menu:menu.name, price:menu.price};
+  // Google Sheets 전송
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(row)
+    });
+  } catch(e) {}
+
   const orders = JSON.parse(localStorage.getItem('lunchOrders')||'[]');
   orders.push(row); localStorage.setItem('lunchOrders', JSON.stringify(orders));
   showStatus(`주문 완료!\n${name} 선생님 · ${menu.name} (${menu.price})`, 'success');
